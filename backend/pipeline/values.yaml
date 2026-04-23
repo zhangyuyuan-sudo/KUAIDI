@@ -14,6 +14,16 @@ env:
     value: "info"
   - name: PORT
     value: "3000"
+  - name: NODE_ENV
+    value: "development"
+  - name: DATA_SOURCE
+    value: "mock"
+  - name: KUaidi100_KEY
+    value: "byrAGPwv7930"
+  - name: KUaidi100_CUSTOMER
+    value: "1E99013A55CB29192A9C91BD14998EC9"
+  - name: KUaidi100_SECRET
+    value: "6c2bb72b6a1b4a04bd29a9bf8f110c05"
 
 livenessProbe: {}
 readinessProbe: {}
