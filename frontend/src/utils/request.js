@@ -1,8 +1,13 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
+const runtimeConfig = globalThis.__APP_CONFIG__ || {}
+
 const request = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL:
+    runtimeConfig.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'http://express-service-backend.traefik.testing/api',
   timeout: 30000
 })
 

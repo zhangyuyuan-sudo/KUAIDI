@@ -8,9 +8,6 @@ RUN npm ci
 
 COPY . .
 
-ARG VITE_API_BASE_URL=/api
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-
 RUN npm run build
 
 FROM node:20-alpine AS runtime
@@ -18,12 +15,16 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \
-    PORT=5173
+    PORT=5173 \
+    VITE_API_BASE_URL=http://express-service-backend.traefik.testing/api
 
 RUN npm install -g serve@14.2.4
 
 COPY --from=build /app/dist ./dist
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+
+RUN chmod +x ./docker-entrypoint.sh
 
 EXPOSE 5173
 
-CMD ["sh", "-c", "serve -s dist -l ${PORT:-5173}"]
+CMD ["./docker-entrypoint.sh"]
