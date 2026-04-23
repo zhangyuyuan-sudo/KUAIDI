@@ -1,0 +1,15 @@
+# 服务基本信息
+service_name: "backend"
+version: "v1.0"
+
+# 镜像仓库配置
+registry: "harbor.domain.vip"
+project: "public/express-service"
+image_name: "backend"
+
+# Dockerfile 配置
+dockerfile_path: "backend/Dockerfile"
+build_context: "backend"
+
+# GitOps 配置
+gitops_deployment_path: "express-service"

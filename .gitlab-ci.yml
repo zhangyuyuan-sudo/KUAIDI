@@ -1,0 +1,36 @@
+stages:
+  - trigger
+
+default:
+  tags:
+    - runner-k8s-111
+
+trigger:backend:
+  stage: trigger
+  trigger:
+    include: backend/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[SKIP\]/'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - backend/**/*
+        - backend/.gitlab-ci.yml
+        - backend/Dockerfile
+        - .gitlab-ci.yml
+
+trigger:frontend:
+  stage: trigger
+  trigger:
+    include: frontend/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[SKIP\]/'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - frontend/**/*
+        - frontend/.gitlab-ci.yml
+        - frontend/Dockerfile
+        - .gitlab-ci.yml

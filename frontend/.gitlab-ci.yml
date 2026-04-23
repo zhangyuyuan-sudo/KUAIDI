@@ -1,0 +1,35 @@
+include:
+  - project: 'ops/cicd-template'
+    ref: main
+    file:
+      - 'templates/precheck.yml'
+      - 'templates/test.yml'
+      - 'templates/build.yml'
+      - 'templates/gitops.yml'
+
+default:
+  tags:
+    - runner-k8s-111
+
+stages:
+  - precheck
+  - test
+  - build
+  - gitops
+
+variables:
+  SERVICE_NAME: "frontend"
+  SERVICE_PATH: "frontend"
+  GITOPS_DEPLOYMENT_PATH: "express-service"
+
+precheck:
+  extends: .precheck
+
+test:
+  extends: .test
+
+build:
+  extends: .build
+
+gitops:
+  extends: .gitops

@@ -1,0 +1,23 @@
+serviceName: "frontend"
+replicaCount: 1
+
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5173
+
+env:
+  - name: PORT
+    value: "5173"
+  - name: VITE_API_BASE_URL
+    value: "/api"
+
+livenessProbe: {}
+readinessProbe: {}
+startupProbe: {}
+persistence: {}
+resources: {}
+envFromConfigMap: {}

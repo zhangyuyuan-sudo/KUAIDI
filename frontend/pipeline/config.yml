@@ -1,0 +1,15 @@
+# 服务基本信息
+service_name: "frontend"
+version: "v1.0"
+
+# 镜像仓库配置
+registry: "harbor.domain.vip"
+project: "public/express-service"
+image_name: "frontend"
+
+# Dockerfile 配置
+dockerfile_path: "frontend/Dockerfile"
+build_context: "frontend"
+
+# GitOps 配置
+gitops_deployment_path: "express-service"

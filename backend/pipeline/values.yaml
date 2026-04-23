@@ -1,0 +1,23 @@
+serviceName: "backend"
+replicaCount: 1
+
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+
+env:
+  - name: LOG_LEVEL
+    value: "info"
+  - name: PORT
+    value: "3000"
+
+livenessProbe: {}
+readinessProbe: {}
+startupProbe: {}
+persistence: {}
+resources: {}
+envFromConfigMap: {}
