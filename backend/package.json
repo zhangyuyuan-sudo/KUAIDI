@@ -1,0 +1,36 @@
+{
+  "name": "kuaibi-backend",
+  "version": "1.0.0",
+  "description": "快递比价系统后端服务",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "express",
+    "courier",
+    "price-compare"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "anymatch": "^3.1.3",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "es-object-atoms": "^1.1.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "joi": "^17.11.0",
+    "node-cache": "^5.1.2",
+    "puppeteer": "^21.6.1",
+    "sql.js": "^1.14.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

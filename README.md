@@ -1,93 +1,370 @@
-# express service
+# 快递比价系统
 
+一个支持多快递公司的在线比价平台，帮助用户快速找到最优惠的快递服务。
 
+## 功能特性
 
-## Getting started
+- **固定寄件信息**：寄件地址预设为公司地址（广东省深圳市南山区大族科技中心1110），寄件人：党娅琪，电话：18202797209
+- **智能地址解析**：收件地址支持文本输入，自动解析省市区、收件人、电话
+- **多数据源支持**：支持模拟数据和快递100真实数据切换
+- **9家主流快递**：顺丰、中通、圆通、韵达、申通、极兔、EMS、德邦、京东
+- **价格排序**：自动按价格从低到高排序，标记最低价
+- **缓存机制**：相同查询条件5分钟内直接返回缓存结果
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 技术栈
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### 前端
+- Vue 3 + Vite
+- Element Plus UI组件库
+- Pinia 状态管理
+- Vue Router 路由管理
+- Axios HTTP客户端
+- SCSS 样式预处理
 
-## Add your files
+### 后端
+- Node.js + Express
+- Joi 参数校验
+- Winston 日志记录
+- Node-cache 内存缓存
+- Express-rate-limit 限流保护
+- Puppeteer 网页抓取（预留）
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## 项目结构
 
 ```
-cd existing_repo
-git remote add origin http://192.168.2.212/dangyaqi/express-service.git
-git branch -M main
-git push -uf origin main
+KUAIDI/
+├── backend/                 # 后端服务
+│   ├── src/
+│   │   ├── app.js          # 应用入口
+│   │   ├── config/         # 配置文件
+│   │   │   ├── index.js    # 基础配置
+│   │   │   └── courier.js  # 快递公司配置
+│   │   ├── controllers/    # 控制器
+│   │   │   └── courierController.js
+│   │   ├── crawlers/       # 快递爬虫模块
+│   │   │   ├── base.js     # 基础爬虫类
+│   │   │   ├── sf.js       # 顺丰
+│   │   │   ├── zt.js       # 中通
+│   │   │   ├── yt.js       # 圆通
+│   │   │   ├── yd.js       # 韵达
+│   │   │   ├── st.js       # 申通
+│   │   │   ├── jt.js       # 极兔
+│   │   │   ├── ems.js      # EMS
+│   │   │   ├── db.js       # 德邦
+│   │   │   ├── jd.js       # 京东
+│   │   │   └── index.js    # 爬虫导出
+│   │   ├── data/           # 数据文件
+│   │   │   └── address.json # 省市区数据
+│   │   ├── middlewares/    # 中间件
+│   │   │   ├── errorHandler.js
+│   │   │   ├── rateLimit.js
+│   │   │   └── validator.js
+│   │   ├── routes/         # 路由
+│   │   │   ├── index.js
+│   │   │   └── courier.js
+│   │   ├── services/       # 业务服务
+│   │   │   ├── cacheService.js
+│   │   │   ├── courierService.js
+│   │   │   └── kuaidi100Service.js
+│   │   └── utils/          # 工具函数
+│   │       └── logger.js
+│   ├── .env                # 环境变量
+│   ├── package.json
+│   └── logs/               # 日志目录
+│
+├── frontend/               # 前端应用
+│   ├── src/
+│   │   ├── api/            # API接口
+│   │   │   └── courier.js
+│   │   ├── assets/         # 静态资源
+│   │   │   └── styles/
+│   │   ├── components/     # 组件
+│   │   │   └── courier/
+│   │   │       └── SearchForm.vue
+│   │   ├── router/         # 路由配置
+│   │   │   └── index.js
+│   │   ├── stores/         # Pinia状态
+│   │   │   └── courier.js
+│   │   ├── utils/          # 工具函数
+│   │   │   └── request.js
+│   │   ├── views/          # 页面
+│   │   │   ├── Home.vue
+│   │   │   └── Result.vue
+│   │   ├── App.vue
+│   │   └── main.js
+│   ├── .env                # 环境变量
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+│
+└── README.md
 ```
 
-## Integrate with your tools
+## 快速开始
 
-- [ ] [Set up project integrations](http://192.168.2.212/dangyaqi/express-service/-/settings/integrations)
+### 环境要求
+- Node.js >= 16.0.0
+- npm >= 8.0.0
 
-## Collaborate with your team
+### 安装依赖
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```bash
+# 后端依赖
+cd backend
+npm install
 
-## Test and Deploy
+# 前端依赖
+cd ../frontend
+npm install
+```
 
-Use the built-in continuous integration in GitLab.
+### 配置环境变量
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+#### 后端配置（backend/.env）
+```env
+# 服务器配置
+PORT=3000
+NODE_ENV=development
 
-***
+# 数据源配置: mock | kuaidi100
+DATA_SOURCE=mock
 
-# Editing this README
+# 快递100配置（使用kuaidi100时需要填写）
+KUaidi100_KEY=your_key_here
+KUaidi100_CUSTOMER=your_customer_here
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+#### 前端配置（frontend/.env）
+```env
+VITE_API_BASE_URL=/api
+```
 
-## Suggestions for a good README
+### 启动服务
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+# 终端1：启动后端
+cd backend
+npm run dev
 
-## Name
-Choose a self-explaining name for your project.
+# 终端2：启动前端
+cd frontend
+npm run dev
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### 访问应用
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+- 前端页面：http://localhost:5173
+- 后端API：http://localhost:3000/api
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## API接口文档
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### 比价接口
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+**POST** `/api/courier/compare`
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+请求参数：
+```json
+{
+  "senderProvince": "广东省",
+  "senderCity": "深圳市",
+  "senderDistrict": "南山区",
+  "receiverProvince": "北京市",
+  "receiverCity": "北京市",
+  "receiverDistrict": "海淀区",
+  "weight": 1,
+  "dataSource": "mock"
+}
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+响应数据：
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "queryId": "q_xxx",
+    "queryTime": "2024-01-01T00:00:00.000Z",
+    "dataSource": "mock",
+    "results": [
+      {
+        "courierCode": "zt",
+        "courierName": "中通快递",
+        "courierLogo": "/logos/zt.svg",
+        "price": 12.00,
+        "originalPrice": 12.00,
+        "discount": "",
+        "estimatedTime": "2-3天",
+        "serviceType": "标准快递",
+        "remark": "",
+        "dataSource": "mock",
+        "isLowest": true
+      }
+    ],
+    "total": 9,
+    "successCount": 9,
+    "failCount": 0,
+    "fromCache": false
+  }
+}
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### 获取数据源列表
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+**GET** `/api/courier/data-sources`
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+响应数据：
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    { "value": "mock", "label": "模拟数据（免费）", "available": true },
+    { "value": "kuaidi100", "label": "快递100（真实数据）", "available": false }
+  ]
+}
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### 获取省市区数据
 
-## License
-For open source projects, say how it is licensed.
+**GET** `/api/courier/address/options`
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### 健康检查
+
+**GET** `/api/health`
+
+## 数据源说明
+
+### 模拟数据（mock）
+- 无需配置，开箱即用
+- 基于预设价格表计算
+- 适合开发和演示
+
+### 快递100（kuaidi100）
+- 需要申请快递100 API密钥
+- 提供真实快递价格
+- 需配置 KEY 和 CUSTOMER
+
+## 支持的快递公司
+
+| 代码 | 名称 | 颜色 |
+|------|------|------|
+| sf | 顺丰速运 | #DC143C |
+| zt | 中通快递 | #4169E1 |
+| yt | 圆通速递 | #FF8C00 |
+| yd | 韵达快递 | #FFD700 |
+| st | 申通快递 | #32CD32 |
+| jt | 极兔速递 | #FF4500 |
+| ems | 邮政EMS | #228B22 |
+| db | 德邦快递 | #4169E1 |
+| jd | 京东快递 | #DC143C |
+
+## 地址解析规则
+
+系统支持智能解析以下格式的地址：
+
+```
+北京市海淀区中关村大街1号，收件人：张三，电话：13800138000
+```
+
+解析结果：
+- 省份：北京市
+- 城市：北京市
+- 区县：海淀区
+- 详细地址：中关村大街1号
+- 收件人：张三
+- 电话：13800138000
+
+## 开发说明
+
+### 添加新的快递公司
+
+1. 在 `backend/src/crawlers/` 创建新的爬虫文件
+2. 继承 `BaseCrawler` 类，实现 `getPrice` 方法
+3. 在 `backend/src/crawlers/index.js` 导出
+4. 在 `backend/src/config/courier.js` 添加配置
+
+### 修改固定寄件信息
+
+编辑 `frontend/src/components/courier/SearchForm.vue`：
+
+```vue
+<div class="sender-info-card">
+  <div class="info-row">
+    <span class="info-label">姓名：</span>
+    <span class="info-value">新姓名</span>
+  </div>
+  <!-- 其他信息 -->
+</div>
+```
+
+修改 `handleSubmit` 中的固定地址：
+
+```javascript
+const params = {
+  senderProvince: '新省份',
+  senderCity: '新城市',
+  senderDistrict: '新区县',
+  // ...
+}
+```
+
+## 常见问题
+
+### Q: 点击比价显示"查询失败请重试"
+A: 
+1. 检查后端服务是否启动
+2. 检查前端代理配置是否正确
+3. 查看后端日志获取详细错误信息
+
+### Q: 快递100数据源显示"需配置"
+A: 在 `backend/.env` 中配置 `KUaidi100_KEY` 和 `KUaidi100_CUSTOMER`
+
+### Q: 地址解析失败
+A: 确保地址包含完整的省市区信息，例如："北京市海淀区xxx"
+
+### Q: 如何清空缓存
+A: 重启后端服务或等待5分钟缓存自动过期
+
+## 部署说明
+
+### 生产环境构建
+
+```bash
+# 前端构建
+cd frontend
+npm run build
+
+# 后端启动
+cd backend
+npm start
+```
+
+### Docker部署（可选）
+
+```dockerfile
+# Dockerfile示例
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+## 更新日志
+
+### v1.0.0
+- 初始版本发布
+- 支持9家主流快递公司比价
+- 支持模拟数据和快递100数据源
+- 智能地址解析功能
+- 固定寄件人信息
+
+## 许可证
+
+MIT License
+
+## 联系方式
+
+如有问题或建议，欢迎提交 Issue 或 Pull Request。
