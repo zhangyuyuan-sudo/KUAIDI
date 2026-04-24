@@ -9,9 +9,28 @@ const routes = require('./routes')
 const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler')
 
 const app = express()
+const corsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(item => item.trim())
+  .filter(Boolean)
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || corsOrigins.length === 0 || corsOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+
+    logger.warn(`CORS blocked origin: ${origin}`)
+    return callback(new Error('Not allowed by CORS'))
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204
+}
 
 app.use(helmet())
-app.use(cors())
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 

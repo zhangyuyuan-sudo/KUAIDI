@@ -24,6 +24,8 @@ env:
     value: "1E99013A55CB29192A9C91BD14998EC9"
   - name: KUaidi100_SECRET
     value: "6c2bb72b6a1b4a04bd29a9bf8f110c05"
+  - name: CORS_ORIGINS
+    value: "https://exp-service.runnto.com,http://exp-service.runnto.com,https://exp-service-backend.runnto.com,http://exp-service-backend.runnto.com"
   - name: APP_BASE_URL
     value: "http://exp-service-backend.runnto.com"
 
