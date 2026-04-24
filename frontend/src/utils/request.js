@@ -7,7 +7,7 @@ const request = axios.create({
   baseURL:
     runtimeConfig.VITE_API_BASE_URL ||
     import.meta.env.VITE_API_BASE_URL ||
-    'http://express-service-backend.traefik.testing/api',
+    'http://exp-service-backend.runnto.com/api',
   timeout: 30000
 })
 
