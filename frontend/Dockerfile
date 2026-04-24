@@ -16,7 +16,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
     PORT=5173 \
-    VITE_API_BASE_URL=http://exp-service-backend.runnto.com/api
+    VITE_API_BASE_URL=https://exp-service-backend.runnto.com/api
 
 RUN npm install -g serve@14.2.4
 
