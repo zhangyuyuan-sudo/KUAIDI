@@ -78,7 +78,7 @@
             <div class="order-header">
               <div class="order-info">
                 <span class="order-id">{{ order.id }}</span>
-                <span class="order-time">{{ formatTime(order.createTime) }}</span>
+                <span class="order-time">{{ formatTime(order.createdAt) }}</span>
               </div>
               <div class="order-status" :class="getStatusClass(order.status)">
                 <span class="status-dot"></span>

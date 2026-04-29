@@ -17,7 +17,7 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">姓名</span>
-            <span class="info-value">党娅琪</span>
+            <span class="info-value">esimfan</span>
           </div>
           <div class="info-item">
             <span class="info-label">电话</span>

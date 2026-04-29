@@ -320,7 +320,7 @@ watch(() => orderForm.value.dayType, () => {
 })
 
 const senderInfo = {
-  name: '党娅琪',
+  name: 'esimfan',
   mobile: '18202797209',
   address: '广东省深圳市南山区大族科技中心1110'
 }
@@ -369,8 +369,43 @@ onMounted(() => {
   if (!store.selectedCourier || !store.queryParams) {
     ElMessage.warning('请先进行比价查询')
     router.push('/')
+    return
   }
+  
+  // 初始化默认取件时间（最快时间）
+  initDefaultPickupTime()
 })
+
+// 初始化默认取件时间
+function initDefaultPickupTime() {
+  const now = new Date()
+  const currentHour = now.getHours()
+  let minHour = currentHour + 2
+  
+  // 如果今天已经无法预约（超过20点），默认选择明天
+  if (minHour >= 20) {
+    orderForm.value.dayType = '明天'
+    orderForm.value.pickupStartTime = '09:00'
+    orderForm.value.pickupEndTime = '11:00'
+  } else {
+    // 今天可以预约，选择最快的时间段
+    orderForm.value.dayType = '今天'
+    // 计算开始时间（向上取整到整点）
+    if (now.getMinutes() > 0) {
+      minHour += 1
+    }
+    // 确保不超过20点
+    if (minHour > 20) {
+      minHour = 20
+    }
+    const startTime = `${String(minHour).padStart(2, '0')}:00`
+    const endHour = Math.min(minHour + 2, 20)
+    const endTime = `${String(endHour).padStart(2, '0')}:00`
+    
+    orderForm.value.pickupStartTime = startTime
+    orderForm.value.pickupEndTime = endTime
+  }
+}
 
 function getLogoGradient(code) {
   const gradients = {

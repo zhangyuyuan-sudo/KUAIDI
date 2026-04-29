@@ -23,7 +23,9 @@ class Kuaidi100OrderService {
   async callApi(method, param) {
     try {
       if (!this.key || !this.secret) {
-        throw new Error('快递100配置不完整，请检查 KUaidi100_KEY 和 KUaidi100_SECRET')
+        const error = new Error('快递100配置不完整，请检查 KUaidi100_KEY 和 KUaidi100_SECRET')
+        error.code = 'CONFIG_ERROR'
+        throw error
       }
 
       const t = Date.now().toString()
@@ -56,8 +58,17 @@ class Kuaidi100OrderService {
 
       return response.data
     } catch (error) {
-      logger.error(`[快递100] ${method} 调用失败: ${error.message}`)
-      throw error
+      const errorMsg = error.response?.data?.message || error.message || '未知错误'
+      logger.error(`[快递100] ${method} 调用失败: ${errorMsg}`, {
+        stack: error.stack,
+        response: error.response?.data
+      })
+      
+      // 重新抛出带有更详细信息的错误
+      const newError = new Error(`快递100调用失败: ${errorMsg}`)
+      newError.code = error.code || 'API_ERROR'
+      newError.originalError = error
+      throw newError
     }
   }
 
@@ -82,17 +93,34 @@ class Kuaidi100OrderService {
       valinsPay         // 保价金额
     } = orderInfo
 
+    // 参数验证
+    if (!kuaidiCom) {
+      throw new Error('快递公司编码不能为空')
+    }
+    if (!recManMobile) {
+      throw new Error('收件人电话不能为空')
+    }
+    if (!recManPrintAddr) {
+      throw new Error('收件人地址不能为空')
+    }
+    if (!sendManMobile) {
+      throw new Error('寄件人电话不能为空')
+    }
+    if (!sendManPrintAddr) {
+      throw new Error('寄件人地址不能为空')
+    }
+
     const param = {
       kuaidicom: kuaidiCom,
-      recManName: recManName,
+      recManName: recManName || '收件人',
       recManMobile: recManMobile,
       recManPrintAddr: recManPrintAddr,
-      sendManName: sendManName,
+      sendManName: sendManName || '寄件人',
       sendManMobile: sendManMobile,
       sendManPrintAddr: sendManPrintAddr,
       cargo: cargo || '物品',
       weight: weight ? String(weight) : '1',
-      payment: 'SHIPPER',  // 寄付
+      payment: 'SHIPPER',
       serviceType: '标准快递'
     }
 
@@ -100,33 +128,26 @@ class Kuaidi100OrderService {
     if (callBackUrl) param.callBackUrl = callBackUrl
     
     // 根据 dayType 计算实际日期
-    // 快递100要求：dayType 只能是 "今天"/"明天"/"后天"（3天内）
-    // pickupStartTime/pickupEndTime 格式必须是 HH:mm（如 09:00）
     if (dayType !== undefined && dayType !== null && dayType !== '') {
       const dayTypeNum = parseInt(dayType)
       
-      // 将数字转换为快递100要求的中文格式
       const dayTypeMap = {
         0: '今天',
         1: '明天',
         2: '后天'
       }
       
-      // 如果超过2（后天），强制改为后天（快递100只支持3天内）
       const validDayType = dayTypeNum > 2 ? 2 : dayTypeNum
       param.dayType = dayTypeMap[validDayType] || '明天'
       
-      // 设置时间段（格式：HH:mm，如 09:00）
-      // 快递100要求时间格式必须是 HH:mm，不能是 YYYY-MM-DD HH:mm:ss
       let startTime = pickupStartTime || '09:00'
       let endTime = pickupEndTime || '11:00'
       
-      // 如果时间格式包含日期（YYYY-MM-DD HH:mm:ss），提取时间部分
       if (startTime.includes(' ')) {
-        startTime = startTime.split(' ')[1].substring(0, 5)  // 提取 HH:mm
+        startTime = startTime.split(' ')[1].substring(0, 5)
       }
       if (endTime.includes(' ')) {
-        endTime = endTime.split(' ')[1].substring(0, 5)  // 提取 HH:mm
+        endTime = endTime.split(' ')[1].substring(0, 5)
       }
       
       param.pickupStartTime = startTime

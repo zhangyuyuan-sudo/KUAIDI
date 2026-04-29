@@ -7,7 +7,7 @@ export const useCourierStore = defineStore('courier', () => {
   const result = ref(null)
   const addressOptions = ref([])
   const dataSources = ref([])
-  const currentDataSource = ref('mock')
+  const currentDataSource = ref('kuaidi100')
   const queryInfo = ref({
     sender: '',
     receiver: '',

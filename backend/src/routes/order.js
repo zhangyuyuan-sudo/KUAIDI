@@ -26,4 +26,7 @@ router.post('/pollCallback', orderController.callback)
 // 刷新订单状态（从快递100查询）
 router.post('/refresh/:id', orderController.refreshStatus)
 
+// 自动刷新所有进行中的订单（定时任务用）
+router.post('/auto-refresh', orderController.autoRefresh)
+
 module.exports = router

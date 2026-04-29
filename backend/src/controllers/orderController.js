@@ -90,7 +90,7 @@ class OrderController {
         recManName: receiverName || '收件人',
         recManMobile: receiverMobile,
         recManPrintAddr: receiverAddress,
-        sendManName: senderName || '党娅琪',
+        sendManName: senderName || 'esimfan',
         sendManMobile: senderMobile,
         sendManPrintAddr: senderAddress,
         cargo: cargo || '物品',
@@ -146,8 +146,18 @@ class OrderController {
         })
       }
     } catch (error) {
-      logger.error('创建订单失败', { error: error.message })
-      next(error)
+      const errorMsg = error.message || '未知错误'
+      const errorStack = error.stack || ''
+      logger.error('创建订单失败', { 
+        error: errorMsg, 
+        stack: errorStack,
+        body: req.body 
+      })
+      
+      // 返回更详细的错误信息
+      const err = new Error(errorMsg)
+      err.statusCode = 500
+      next(err)
     }
   }
 
@@ -297,7 +307,7 @@ class OrderController {
   async syncPay(req, res, next) {
     try {
       const { orderId } = req.body
-      const order = orderService.getOrder(orderId)
+      const order = await orderService.getOrder(orderId)
 
       if (!order) {
         return res.status(404).json({
@@ -318,7 +328,7 @@ class OrderController {
       const result = await kuaidi100OrderService.syncPayStatus(order.orderId)
 
       if (result.result) {
-        orderService.updatePayStatus(orderId, 1)
+        await orderService.updatePayStatus(orderId, 1)
         res.json({
           code: 200,
           message: '支付同步成功',
@@ -341,7 +351,7 @@ class OrderController {
   async refreshStatus(req, res, next) {
     try {
       const { id } = req.params
-      const order = orderService.getOrder(id)
+      const order = await orderService.getOrder(id)
 
       if (!order) {
         return res.status(404).json({
@@ -378,7 +388,7 @@ class OrderController {
         if (data.freight) extraData.actualPrice = data.freight
         if (data.message) extraData.statusMessage = data.message
 
-        orderService.updateOrderStatus(order.id, extraData.status || order.status, extraData)
+        await orderService.updateOrderStatus(order.id, extraData.status || order.status, extraData)
 
         res.json({
           code: 200,
@@ -404,6 +414,68 @@ class OrderController {
     } catch (error) {
       logger.error('刷新订单状态失败', { error: error.message })
       next(error)
+    }
+  }
+
+  // 自动刷新所有进行中的订单（定时任务用）
+  async autoRefresh(req, res, next) {
+    try {
+      logger.info('开始自动刷新订单状态')
+      const orders = await orderService.getAllOrders()
+      
+      // 只刷新未完成的订单（status < 13）
+      const pendingOrders = orders.filter(o => o.status < 13 && o.taskId)
+      
+      let successCount = 0
+      let failCount = 0
+      
+      for (const order of pendingOrders) {
+        try {
+          const result = await kuaidi100OrderService.getOrderDetail(order.taskId)
+          
+          if (result.result && result.data) {
+            const data = result.data
+            const extraData = {}
+            
+            if (data.status !== undefined) {
+              extraData.status = parseInt(data.status)
+            }
+            if (data.kuaidinum) extraData.kuaidiNum = data.kuaidinum
+            if (data.courierName) extraData.courierName_real = data.courierName
+            if (data.courierMobile) extraData.courierMobile = data.courierMobile
+            if (data.weight) extraData.actualWeight = data.weight
+            if (data.freight) extraData.actualPrice = data.freight
+            
+            await orderService.updateOrderStatus(order.id, extraData.status || order.status, extraData)
+            successCount++
+          } else {
+            failCount++
+          }
+          
+          // 延迟500ms，避免请求过快
+          await new Promise(resolve => setTimeout(resolve, 500))
+        } catch (err) {
+          logger.warn(`自动刷新订单失败 [${order.id}]: ${err.message}`)
+          failCount++
+        }
+      }
+      
+      logger.info(`自动刷新完成，成功: ${successCount}, 失败: ${failCount}`)
+      
+      if (res) {
+        res.json({
+          code: 200,
+          message: '自动刷新完成',
+          data: {
+            total: pendingOrders.length,
+            success: successCount,
+            fail: failCount
+          }
+        })
+      }
+    } catch (error) {
+      logger.error('自动刷新订单失败', { error: error.message })
+      if (next) next(error)
     }
   }
 }
