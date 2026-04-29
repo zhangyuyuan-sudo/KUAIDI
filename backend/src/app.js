@@ -25,37 +25,21 @@ app.use('/api', routes)
 app.use(notFoundHandler)
 app.use(errorHandler)
 
-const net = require('net')
-
-function findAvailablePort(startPort) {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer()
-    server.listen(startPort, () => {
-      const port = server.address().port
-      server.close(() => resolve(port))
-    })
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        findAvailablePort(startPort + 1).then(resolve).catch(reject)
-      } else {
-        reject(err)
-      }
-    })
+function startServer() {
+  const server = app.listen(config.port, () => {
+    logger.info(`服务器启动成功，端口: ${config.port}`)
+    logger.info(`环境: ${config.env}`)
+    logger.info(`API地址: http://localhost:${config.port}/api`)
   })
-}
 
-async function startServer() {
-  try {
-    const port = await findAvailablePort(config.port)
-    app.listen(port, () => {
-      logger.info(`服务器启动成功，端口: ${port}`)
-      logger.info(`环境: ${config.env}`)
-      logger.info(`API文档: http://localhost:${port}/api`)
-    })
-  } catch (error) {
-    logger.error('服务器启动失败', { error: error.message })
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      logger.error(`端口 ${config.port} 已被占用，请释放该端口或通过 PORT 指定其他端口`)
+    } else {
+      logger.error('服务器启动失败', { error: error.message })
+    }
     process.exit(1)
-  }
+  })
 }
 
 startServer()
@@ -67,9 +51,9 @@ process.on('uncaughtException', (error) => {
   process.exit(1)
 })
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('未处理的Promise拒绝:', reason)
-  logger.error('未处理的Promise拒绝', { reason })
+process.on('unhandledRejection', (reason) => {
+  console.error('未处理的 Promise 拒绝:', reason)
+  logger.error('未处理的 Promise 拒绝', { reason })
 })
 
 module.exports = app
